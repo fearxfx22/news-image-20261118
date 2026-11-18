@@ -11,7 +11,13 @@ import shutil
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-OUT = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
+OUT = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")).resolve()
 OUT.mkdir(parents=True, exist_ok=True)
-shutil.copyfile(HERE / "entry.png", OUT / "entry.png")
-print("wrote", OUT / "entry.png")
+SRC = HERE / "entry.png"
+DST = OUT / "entry.png"
+shutil.copyfile(SRC, DST)
+# Verify the copy: the judge must see exactly the bytes the repo holds.
+if DST.stat().st_size != SRC.stat().st_size:
+    raise SystemExit(f"copy mismatch: {DST} is {DST.stat().st_size} bytes, "
+                     f"expected {SRC.stat().st_size}")
+print("wrote", DST, f"({DST.stat().st_size} bytes)")
